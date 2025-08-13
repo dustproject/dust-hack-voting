@@ -16,8 +16,9 @@ import { votingSystem } from "../src/codegen/systems/VotingSystemLib.sol";
 contract PostDeploy is Script {
   function run(address worldAddress) external {
     StoreSwitch.setStoreAddress(worldAddress);
-    startBroadcast();
+    address deployer = startBroadcast();
 
+    votingSystem.setModerator({ user: deployer, isModerator: true });
     votingSystem.setConfig({
       votingStartTimestamp: uint32(block.timestamp),
       votingEndTimestamp: 1755280800, // Friday, August 15, 2025 6:00:00 PM (GMT)
