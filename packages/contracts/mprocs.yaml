@@ -1,0 +1,8 @@
+scrollback: 10000
+procs:
+  anvil:
+    shell: anvil
+  contracts:
+    shell: DEBUG=mud:* pnpm mud dev-contracts --rpc http://localhost:8545
+  test:
+    shell: wait-on deploys/31337/latest.json && pnpm mud test --worldAddress 0xfDf868Ea710FfD8cd33b829c5AFf79eDd15EcD5f

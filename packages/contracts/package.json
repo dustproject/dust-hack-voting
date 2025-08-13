@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "build": "mud build",
+    "dev": "shx rm -rf deploys/31337/latest.json && mprocs",
     "clean": "forge clean && shx rm -rf src/**/codegen",
     "mud:up": "pnpm mud set-version --tag main && pnpm install",
     "foundry:up": "curl -L https://foundry.paradigm.xyz | bash && bash $HOME/.foundry/bin/foundryup",
