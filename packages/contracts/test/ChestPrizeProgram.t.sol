@@ -6,22 +6,47 @@ import { EntityId, EntityTypeLib } from "@dust/world/src/types/EntityId.sol";
 import { ObjectType, ObjectTypes } from "@dust/world/src/types/ObjectType.sol";
 import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
 import { console } from "forge-std/console.sol";
+import { IWorld } from "../src/codegen/world/IWorld.sol";
+import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
 
 import { ChestPrizeProgram } from "../src/ChestPrizeProgram.sol";
 import { Constants } from "../src/Constants.sol";
+import { HACKATHON_NAMESPACE_ID } from "../src/common.sol";
 
 import { chestPrizeProgram } from "../src/codegen/systems/ChestPrizeProgramLib.sol";
-import { IWorld } from "../src/codegen/world/IWorld.sol";
+import { chestPrizeSystem } from "../src/codegen/systems/ChestPrizeSystemLib.sol";
+import { votingSystem } from "../src/codegen/systems/VotingSystemLib.sol";
+import { Config } from "../src/codegen/tables/Config.sol";
+import { Submissions } from "../src/codegen/tables/Submissions.sol";
+import { SubmissionCreators } from "../src/codegen/tables/SubmissionCreators.sol";
+import { ChestPrizeConfig } from "../src/codegen/tables/ChestPrizeConfig.sol";
+import { LeaderboardPosition } from "../src/codegen/common.sol";
 
 contract ChestPrizeProgramTest is MudTest {
+  IWorld world;
   ChestPrizeProgram program;
 
-  EntityId chest;
-  EntityId player;
+  EntityId chest1;
+  EntityId chest2;
+  EntityId chest3;
+  EntityId player1;
+  EntityId player2;
+  EntityId player3;
+  EntityId player4;
+
+  address winner1;
+  address winner2; 
+  address winner3;
+  address nonWinner;
+  address moderator;
+  address namespaceOwner;
 
   function setUp() public override {
     super.setUp();
-
+    
+    // Get world instance
+    world = IWorld(worldAddress);
+    
     // Deploy the programs
     program = ChestPrizeProgram(chestPrizeProgram.getAddress());
 
@@ -30,141 +55,399 @@ contract ChestPrizeProgramTest is MudTest {
     vm.store(address(program), worldSlot, worldAddressBytes32);
 
     // Create test entities
-    chest = EntityId.wrap(bytes32(uint256(1)));
-    player = EntityTypeLib.encodePlayer(vm.randomAddress());
+    chest1 = EntityId.wrap(bytes32(uint256(1)));
+    chest2 = EntityId.wrap(bytes32(uint256(2)));
+    chest3 = EntityId.wrap(bytes32(uint256(3)));
+    
+    // Set up test accounts
+    winner1 = address(0x1);
+    winner2 = address(0x2);
+    winner3 = address(0x3);
+    nonWinner = address(0x4);
+    moderator = address(0x5);
+    namespaceOwner = address(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266);
+    
+    player1 = EntityTypeLib.encodePlayer(winner1);
+    player2 = EntityTypeLib.encodePlayer(winner2);
+    player3 = EntityTypeLib.encodePlayer(winner3);
+    player4 = EntityTypeLib.encodePlayer(nonWinner);
+
+    // Set up namespace owner and moderator
+    vm.prank(namespaceOwner);
+    votingSystem.setModerator(moderator, true);
+
+    // Set up voting config with voting period active
+    vm.prank(moderator);
+    votingSystem.setConfig(uint32(block.timestamp - 200), uint32(block.timestamp + 100), 3);
+
+    // Register participants
+    vm.startPrank(moderator);
+    votingSystem.registerParticipant(winner1);
+    votingSystem.registerParticipant(winner2);
+    votingSystem.registerParticipant(winner3);
+    votingSystem.registerParticipant(nonWinner);
+    vm.stopPrank();
+
+    // Create submissions
+    vm.prank(winner1);
+    votingSystem.createSubmission("First Place", "github1", "video1");
+    
+    vm.prank(winner2);
+    votingSystem.createSubmission("Second Place", "github2", "video2");
+    
+    vm.prank(winner3);
+    votingSystem.createSubmission("Third Place", "github3", "video3");
+
+    // Vote to establish leaderboard
+    // Winner1 gets 3 votes
+    vm.prank(winner2);
+    votingSystem.vote(winner1);
+    vm.prank(winner3);
+    votingSystem.vote(winner1);
+    vm.prank(nonWinner);
+    votingSystem.vote(winner1);
+    
+    // Winner2 gets 2 votes
+    vm.prank(winner1);
+    votingSystem.vote(winner2);
+    vm.prank(winner3);
+    votingSystem.vote(winner2);
+    
+    // Winner3 gets 1 vote
+    vm.prank(winner1);
+    votingSystem.vote(winner3);
+
+    // Move time forward to end voting
+    vm.warp(block.timestamp + 200);
   }
 
-  // function testTransferAllowedWhenCounterIsOdd() public {
-  //   // Set counter to 1 (odd)
-  //   counterSystem.setValue(1);
+  function test_ChestPrizeSystem_OnlyModeratorCanConfigureChest() public {
+    // Moderator should be able to configure chest
+    vm.prank(moderator);
+    chestPrizeSystem.configureChest(chest1, LeaderboardPosition.First);
+    assertEq(uint256(ChestPrizeConfig.getPosition(chest1)), uint256(LeaderboardPosition.First));
 
-  //   HookContext memory ctx = HookContext({ caller: player, target: chest, revertOnFailure: true, extraData: "" });
+    // Non-moderator should not be able to configure chest
+    vm.prank(nonWinner);
+    vm.expectRevert(abi.encodeWithSignature("NotModerator(address)", nonWinner));
+    chestPrizeSystem.configureChest(chest2, LeaderboardPosition.Second);
+  }
 
-  //   SlotData[] memory deposits = new SlotData[](1);
-  //   deposits[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 5 });
+  function test_ChestPrizeSystem_CannotSetInvalidPosition() public {
+    // Cannot set position to Unset
+    vm.prank(moderator);
+    vm.expectRevert(abi.encodeWithSignature("InvalidPosition()"));
+    chestPrizeSystem.configureChest(chest1, LeaderboardPosition.Unset);
+  }
 
-  //   ITransfer.TransferData memory transfer = ITransfer.TransferData({
-  //     deposits: deposits,
-  //     withdrawals: new SlotData[](0)
-  //   });
+  function test_ChestPrizeSystem_CanRemoveChestConfig() public {
+    // Configure chest first
+    vm.prank(moderator);
+    chestPrizeSystem.configureChest(chest1, LeaderboardPosition.First);
+    assertEq(uint256(ChestPrizeConfig.getPosition(chest1)), uint256(LeaderboardPosition.First));
 
-  //   // Should not revert when counter is odd
-  //   vm.prank(worldAddress);
-  //   program.onTransfer(ctx, transfer);
-  // }
+    // Remove configuration
+    vm.prank(moderator);
+    chestPrizeSystem.removeChestConfig(chest1);
+    assertEq(uint256(ChestPrizeConfig.getPosition(chest1)), uint256(LeaderboardPosition.Unset));
+  }
 
-  // function testTransferBlockedWhenCounterIsEven() public {
-  //   // Set counter to 2 (even)
-  //   counterSystem.setValue(2);
+  function test_CannotDepositToChest() public {
+    // Configure chest
+    vm.prank(moderator);
+    chestPrizeSystem.configureChest(chest1, LeaderboardPosition.First);
 
-  //   HookContext memory ctx = HookContext({ caller: player, target: chest, revertOnFailure: true, extraData: "" });
+    HookContext memory ctx = HookContext({ 
+      caller: player1, 
+      target: chest1, 
+      revertOnFailure: true, 
+      extraData: "" 
+    });
 
-  //   SlotData[] memory deposits = new SlotData[](1);
-  //   deposits[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 5 });
+    SlotData[] memory deposits = new SlotData[](1);
+    deposits[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 5 });
 
-  //   ITransfer.TransferData memory transfer = ITransfer.TransferData({
-  //     deposits: deposits,
-  //     withdrawals: new SlotData[](0)
-  //   });
+    ITransfer.TransferData memory transfer = ITransfer.TransferData({
+      deposits: deposits,
+      withdrawals: new SlotData[](0)
+    });
 
-  //   // Should revert when counter is even
-  //   vm.expectRevert("Transfers only allowed when counter is odd");
-  //   vm.prank(worldAddress);
-  //   program.onTransfer(ctx, transfer);
-  // }
+    vm.prank(worldAddress);
+    vm.expectRevert(abi.encodeWithSignature("DepositNotAllowed()"));
+    program.onTransfer(ctx, transfer);
+  }
 
-  // function testCounterSystemIncrementAndTransfer() public {
-  //   // Start with counter at 0 (even)
+  function test_CannotWithdrawBeforeVotingEnds() public {
+    // Reset voting to not ended yet
+    vm.prank(moderator);
+    votingSystem.setConfig(uint32(block.timestamp), uint32(block.timestamp + 100), 3);
+    
+    // Configure chest
+    vm.prank(moderator);
+    chestPrizeSystem.configureChest(chest1, LeaderboardPosition.First);
 
-  //   HookContext memory ctx = HookContext({ caller: player, target: chest, revertOnFailure: true, extraData: "" });
+    HookContext memory ctx = HookContext({ 
+      caller: player1, 
+      target: chest1, 
+      revertOnFailure: true, 
+      extraData: "" 
+    });
 
-  //   SlotData[] memory deposits = new SlotData[](1);
-  //   deposits[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 5 });
+    SlotData[] memory withdrawals = new SlotData[](1);
+    withdrawals[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 10 });
 
-  //   ITransfer.TransferData memory transfer = ITransfer.TransferData({
-  //     deposits: deposits,
-  //     withdrawals: new SlotData[](0)
-  //   });
+    ITransfer.TransferData memory transfer = ITransfer.TransferData({
+      deposits: new SlotData[](0),
+      withdrawals: withdrawals
+    });
 
-  //   // Transfer should fail at 0 (even)
-  //   vm.expectRevert("Transfers only allowed when counter is odd");
-  //   vm.prank(worldAddress);
-  //   program.onTransfer(ctx, transfer);
+    vm.prank(worldAddress);
+    vm.expectRevert(abi.encodeWithSignature("VotingNotEnded()"));
+    program.onTransfer(ctx, transfer);
+  }
 
-  //   // Increment counter to 1 (odd)
-  //   counterSystem.increment();
-  //   assertEq(Counter.getValue(), 1);
+  function test_CannotWithdrawFromUnconfiguredChest() public {
+    HookContext memory ctx = HookContext({ 
+      caller: player1, 
+      target: chest1, 
+      revertOnFailure: true, 
+      extraData: "" 
+    });
 
-  //   // Now transfer should succeed
-  //   vm.prank(worldAddress);
-  //   program.onTransfer(ctx, transfer);
+    SlotData[] memory withdrawals = new SlotData[](1);
+    withdrawals[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 10 });
 
-  //   // Increment counter to 2 (even)
-  //   counterSystem.increment();
-  //   assertEq(Counter.getValue(), 2);
+    ITransfer.TransferData memory transfer = ITransfer.TransferData({
+      deposits: new SlotData[](0),
+      withdrawals: withdrawals
+    });
 
-  //   // Transfer should fail again
-  //   vm.expectRevert("Transfers only allowed when counter is odd");
-  //   vm.prank(worldAddress);
-  //   program.onTransfer(ctx, transfer);
+    vm.prank(worldAddress);
+    vm.expectRevert(abi.encodeWithSignature("ChestNotConfigured()"));
+    program.onTransfer(ctx, transfer);
+  }
 
-  //   // Increment counter to 3 (odd)
-  //   counterSystem.increment();
-  //   assertEq(Counter.getValue(), 3);
+  function test_OnlyWinnerCanWithdraw() public {
+    // Configure chests for each position
+    vm.startPrank(moderator);
+    chestPrizeSystem.configureChest(chest1, LeaderboardPosition.First);
+    chestPrizeSystem.configureChest(chest2, LeaderboardPosition.Second);
+    chestPrizeSystem.configureChest(chest3, LeaderboardPosition.Third);
+    vm.stopPrank();
 
-  //   // Transfer should succeed again
-  //   vm.prank(worldAddress);
-  //   program.onTransfer(ctx, transfer);
-  // }
+    // Non-winner tries to withdraw from first place chest
+    HookContext memory ctx = HookContext({ 
+      caller: player4, 
+      target: chest1, 
+      revertOnFailure: true, 
+      extraData: "" 
+    });
 
-  // function testWithdrawalsFollowSameRule() public {
-  //   // Set counter to 1 (odd) - withdrawals allowed
-  //   counterSystem.setValue(1);
+    SlotData[] memory withdrawals = new SlotData[](1);
+    withdrawals[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 10 });
 
-  //   HookContext memory ctx = HookContext({ caller: player, target: chest, revertOnFailure: true, extraData: "" });
+    ITransfer.TransferData memory transfer = ITransfer.TransferData({
+      deposits: new SlotData[](0),
+      withdrawals: withdrawals
+    });
 
-  //   SlotData[] memory withdrawals = new SlotData[](1);
-  //   withdrawals[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 3 });
+    vm.prank(worldAddress);
+    vm.expectRevert(abi.encodeWithSignature("NotWinner()"));
+    program.onTransfer(ctx, transfer);
+  }
 
-  //   ITransfer.TransferData memory transfer = ITransfer.TransferData({
-  //     deposits: new SlotData[](0),
-  //     withdrawals: withdrawals
-  //   });
+  function test_FirstPlaceWinnerCanWithdrawFromFirstPlaceChest() public {
+    // Configure chest for first place
+    vm.prank(moderator);
+    chestPrizeSystem.configureChest(chest1, LeaderboardPosition.First);
 
-  //   // Withdrawal should succeed when counter is odd
-  //   vm.prank(worldAddress);
-  //   program.onTransfer(ctx, transfer);
+    // First place winner withdraws
+    HookContext memory ctx = HookContext({ 
+      caller: player1, 
+      target: chest1, 
+      revertOnFailure: true, 
+      extraData: "" 
+    });
 
-  //   // Set counter to 4 (even) - withdrawals blocked
-  //   counterSystem.setValue(4);
+    SlotData[] memory withdrawals = new SlotData[](2);
+    withdrawals[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 100 });
+    withdrawals[1] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.Dirt, amount: 50 });
 
-  //   // Withdrawal should fail when counter is even
-  //   vm.expectRevert("Transfers only allowed when counter is odd");
-  //   vm.prank(worldAddress);
-  //   program.onTransfer(ctx, transfer);
-  // }
+    ITransfer.TransferData memory transfer = ITransfer.TransferData({
+      deposits: new SlotData[](0),
+      withdrawals: withdrawals
+    });
 
-  // function testNonRevertingMode() public {
-  //   // Set counter to 2 (even)
-  //   counterSystem.setValue(2);
+    // Should not revert
+    vm.prank(worldAddress);
+    program.onTransfer(ctx, transfer);
+  }
 
-  //   HookContext memory ctx = HookContext({
-  //     caller: player,
-  //     target: chest,
-  //     revertOnFailure: false, // Non-reverting mode
-  //     extraData: ""
-  //   });
+  function test_SecondPlaceWinnerCanWithdrawFromSecondPlaceChest() public {
+    // Configure chest for second place
+    vm.prank(moderator);
+    chestPrizeSystem.configureChest(chest2, LeaderboardPosition.Second);
 
-  //   SlotData[] memory deposits = new SlotData[](1);
-  //   deposits[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 5 });
+    // Second place winner withdraws
+    HookContext memory ctx = HookContext({ 
+      caller: player2, 
+      target: chest2, 
+      revertOnFailure: true, 
+      extraData: "" 
+    });
 
-  //   ITransfer.TransferData memory transfer = ITransfer.TransferData({
-  //     deposits: deposits,
-  //     withdrawals: new SlotData[](0)
-  //   });
+    SlotData[] memory withdrawals = new SlotData[](1);
+    withdrawals[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 75 });
 
-  //   // Should not revert in non-reverting mode, even when counter is even
-  //   vm.prank(worldAddress);
-  //   program.onTransfer(ctx, transfer);
-  // }
+    ITransfer.TransferData memory transfer = ITransfer.TransferData({
+      deposits: new SlotData[](0),
+      withdrawals: withdrawals
+    });
+
+    // Should not revert
+    vm.prank(worldAddress);
+    program.onTransfer(ctx, transfer);
+  }
+
+  function test_ThirdPlaceWinnerCanWithdrawFromThirdPlaceChest() public {
+    // Configure chest for third place
+    vm.prank(moderator);
+    chestPrizeSystem.configureChest(chest3, LeaderboardPosition.Third);
+
+    // Third place winner withdraws
+    HookContext memory ctx = HookContext({ 
+      caller: player3, 
+      target: chest3, 
+      revertOnFailure: true, 
+      extraData: "" 
+    });
+
+    SlotData[] memory withdrawals = new SlotData[](1);
+    withdrawals[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 25 });
+
+    ITransfer.TransferData memory transfer = ITransfer.TransferData({
+      deposits: new SlotData[](0),
+      withdrawals: withdrawals
+    });
+
+    // Should not revert
+    vm.prank(worldAddress);
+    program.onTransfer(ctx, transfer);
+  }
+
+  function test_WinnersCannotWithdrawFromWrongChest() public {
+    // Configure chests
+    vm.startPrank(moderator);
+    chestPrizeSystem.configureChest(chest1, LeaderboardPosition.First);
+    chestPrizeSystem.configureChest(chest2, LeaderboardPosition.Second);
+    vm.stopPrank();
+
+    // First place winner tries to withdraw from second place chest
+    HookContext memory ctx = HookContext({ 
+      caller: player1, 
+      target: chest2, 
+      revertOnFailure: true, 
+      extraData: "" 
+    });
+
+    SlotData[] memory withdrawals = new SlotData[](1);
+    withdrawals[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 10 });
+
+    ITransfer.TransferData memory transfer = ITransfer.TransferData({
+      deposits: new SlotData[](0),
+      withdrawals: withdrawals
+    });
+
+    vm.prank(worldAddress);
+    vm.expectRevert(abi.encodeWithSignature("NotWinner()"));
+    program.onTransfer(ctx, transfer);
+  }
+
+  function test_NoWinnerIfNoSubmissions() public {
+    // Clear all submissions by using namespace owner
+    vm.prank(namespaceOwner);
+    SubmissionCreators.set(new address[](0));
+
+    // Configure chest
+    vm.prank(moderator);
+    chestPrizeSystem.configureChest(chest1, LeaderboardPosition.First);
+
+    HookContext memory ctx = HookContext({ 
+      caller: player1, 
+      target: chest1, 
+      revertOnFailure: true, 
+      extraData: "" 
+    });
+
+    SlotData[] memory withdrawals = new SlotData[](1);
+    withdrawals[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 10 });
+
+    ITransfer.TransferData memory transfer = ITransfer.TransferData({
+      deposits: new SlotData[](0),
+      withdrawals: withdrawals
+    });
+
+    vm.prank(worldAddress);
+    vm.expectRevert(abi.encodeWithSignature("NoSubmissions()"));
+    program.onTransfer(ctx, transfer);
+  }
+
+  function test_HandlesFewerSubmissionsThanPositions() public {
+    // Clear submissions and only add two by using namespace owner
+    address[] memory twoCreators = new address[](2);
+    twoCreators[0] = winner1;
+    twoCreators[1] = winner2;
+    vm.prank(namespaceOwner);
+    SubmissionCreators.set(twoCreators);
+
+    // Configure chest for third place (which doesn't exist)
+    vm.prank(moderator);
+    chestPrizeSystem.configureChest(chest3, LeaderboardPosition.Third);
+
+    // Anyone trying to withdraw from third place chest should fail
+    HookContext memory ctx = HookContext({ 
+      caller: player1, 
+      target: chest3, 
+      revertOnFailure: true, 
+      extraData: "" 
+    });
+
+    SlotData[] memory withdrawals = new SlotData[](1);
+    withdrawals[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 10 });
+
+    ITransfer.TransferData memory transfer = ITransfer.TransferData({
+      deposits: new SlotData[](0),
+      withdrawals: withdrawals
+    });
+
+    vm.prank(worldAddress);
+    vm.expectRevert(abi.encodeWithSignature("NotWinner()"));
+    program.onTransfer(ctx, transfer);
+  }
+
+  function test_NonRevertingTransfersAreIgnored() public {
+    // Configure chest
+    vm.prank(moderator);
+    chestPrizeSystem.configureChest(chest1, LeaderboardPosition.First);
+
+    // Non-reverting context (revertOnFailure = false)
+    HookContext memory ctx = HookContext({ 
+      caller: player4, // non-winner
+      target: chest1, 
+      revertOnFailure: false, 
+      extraData: "" 
+    });
+
+    SlotData[] memory withdrawals = new SlotData[](1);
+    withdrawals[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 10 });
+
+    ITransfer.TransferData memory transfer = ITransfer.TransferData({
+      deposits: new SlotData[](0),
+      withdrawals: withdrawals
+    });
+
+    // Should not revert even though player4 is not a winner
+    vm.prank(worldAddress);
+    program.onTransfer(ctx, transfer);
+  }
 }

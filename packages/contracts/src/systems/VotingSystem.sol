@@ -9,6 +9,7 @@ import { AccessControl } from "@latticexyz/world/src/AccessControl.sol";
 import { HACKATHON_NAMESPACE_ID } from "../common.sol";
 import { Config, ConfigData } from "../codegen/tables/Config.sol";
 import { Votes } from "../codegen/tables/Votes.sol";
+import { SubmissionCreators } from "../codegen/tables/SubmissionCreators.sol";
 
 contract VotingSystem is System {
   error AccessDenied(address user);
@@ -78,6 +79,8 @@ contract VotingSystem is System {
         demoVideoUrl: demoVideoUrl
       })
     );
+
+    SubmissionCreators.push(user);
   }
 
   /// @notice Update the name of a submission. Only the submission creator can update the name

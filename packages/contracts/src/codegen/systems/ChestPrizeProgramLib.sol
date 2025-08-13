@@ -37,13 +37,18 @@ struct RootCallWrapper {
  */
 library ChestPrizeProgramLib {
   error ChestPrizeProgramLib_CallingFromRootSystem();
+  error VotingNotEnded();
+  error NotWinner();
+  error NoSubmissions();
+  error ChestNotConfigured();
+  error DepositNotAllowed();
 
   function onTransfer(
     ChestPrizeProgramType self,
     HookContext memory ctx,
-    ITransfer.TransferData memory __auxArg0
+    ITransfer.TransferData memory transfer
   ) internal view {
-    return CallWrapper(self.toResourceId(), address(0)).onTransfer(ctx, __auxArg0);
+    return CallWrapper(self.toResourceId(), address(0)).onTransfer(ctx, transfer);
   }
 
   function _msgSender(ChestPrizeProgramType self) internal view returns (address __auxRet0) {
@@ -57,14 +62,14 @@ library ChestPrizeProgramLib {
   function onTransfer(
     CallWrapper memory self,
     HookContext memory ctx,
-    ITransfer.TransferData memory __auxArg0
+    ITransfer.TransferData memory transfer
   ) internal view {
     // if the contract calling this function is a root system, it should use `callAsRoot`
     if (address(_world()) == address(this)) revert ChestPrizeProgramLib_CallingFromRootSystem();
 
     bytes memory systemCall = abi.encodeCall(
       _onTransfer_HookContext_ITransfer_TransferData.onTransfer,
-      (ctx, __auxArg0)
+      (ctx, transfer)
     );
     bytes memory worldCall = self.from == address(0)
       ? abi.encodeCall(IWorldCall.call, (self.systemId, systemCall))
@@ -113,11 +118,11 @@ library ChestPrizeProgramLib {
   function onTransfer(
     RootCallWrapper memory self,
     HookContext memory ctx,
-    ITransfer.TransferData memory __auxArg0
+    ITransfer.TransferData memory transfer
   ) internal view {
     bytes memory systemCall = abi.encodeCall(
       _onTransfer_HookContext_ITransfer_TransferData.onTransfer,
-      (ctx, __auxArg0)
+      (ctx, transfer)
     );
     SystemCall.staticcallOrRevert(self.from, self.systemId, systemCall);
   }
@@ -181,7 +186,7 @@ library ChestPrizeProgramLib {
  */
 
 interface _onTransfer_HookContext_ITransfer_TransferData {
-  function onTransfer(HookContext memory ctx, ITransfer.TransferData memory __auxArg0) external;
+  function onTransfer(HookContext memory ctx, ITransfer.TransferData memory transfer) external;
 }
 
 interface __msgSender {

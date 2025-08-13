@@ -40,39 +40,30 @@
   },
   {
     "type": "function",
-    "name": "decrement",
-    "inputs": [],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "getValue",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "increment",
-    "inputs": [],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "setValue",
+    "name": "configureChest",
     "inputs": [
       {
-        "name": "newValue",
-        "type": "uint256",
-        "internalType": "uint256"
+        "name": "chest",
+        "type": "bytes32",
+        "internalType": "EntityId"
+      },
+      {
+        "name": "position",
+        "type": "uint8",
+        "internalType": "enum LeaderboardPosition"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "removeChestConfig",
+    "inputs": [
+      {
+        "name": "chest",
+        "type": "bytes32",
+        "internalType": "EntityId"
       }
     ],
     "outputs": [],
@@ -127,6 +118,22 @@
       }
     ],
     "anonymous": false
+  },
+  {
+    "type": "error",
+    "name": "InvalidPosition",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "NotModerator",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
   },
   {
     "type": "error",

@@ -4,6 +4,9 @@ export default defineWorld({
   codegen: {
     generateSystemLibraries: true,
   },
+  enums: {
+    LeaderboardPosition: ["Unset", "First", "Second", "Third"],
+  },
   userTypes: {
     ObjectType: {
       filePath: "@dust/world/src/types/ObjectType.sol",
@@ -43,6 +46,9 @@ export default defineWorld({
     },
     ChestPrizeProgram: {
       openAccess: false,
+      deploy: { registerWorldFunctions: false },
+    },
+    ChestPrizeSystem: {
       deploy: { registerWorldFunctions: false },
     },
   },
@@ -88,6 +94,19 @@ export default defineWorld({
         votesGiven: "uint32",
       },
       key: ["voter", "submission"],
+    },
+    SubmissionCreators: {
+      schema: {
+        creators: "address[]",
+      },
+      key: [],
+    },
+    ChestPrizeConfig: {
+      schema: {
+        chest: "EntityId",
+        position: "LeaderboardPosition",
+      },
+      key: ["chest"],
     },
   },
 });
