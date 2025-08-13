@@ -137,6 +137,8 @@ contract VotingSystem is System {
     Submissions.setVotesReceived({ creator: creator, votesReceived: Submissions.getVotesReceived(creator) + 1 });
   }
 
+  /// @notice Revoke a vote for a submission. Only participants who have voted can revoke votes.
+  /// @param creator The address of the submission creator
   function revokeVote(address creator) public {
     address caller = _msgSender();
 

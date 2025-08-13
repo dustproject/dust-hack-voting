@@ -7,18 +7,22 @@ import { console } from "forge-std/console.sol";
 import { Script } from "./Script.sol";
 
 import { bedProgram } from "../src/codegen/systems/BedProgramLib.sol";
-
 import { chestPrizeProgram } from "../src/codegen/systems/ChestPrizeProgramLib.sol";
 import { chestProgram } from "../src/codegen/systems/ChestProgramLib.sol";
 import { forceFieldProgram } from "../src/codegen/systems/ForceFieldProgramLib.sol";
 import { spawnTileProgram } from "../src/codegen/systems/SpawnTileProgramLib.sol";
+import { votingSystem } from "../src/codegen/systems/VotingSystemLib.sol";
 
 contract PostDeploy is Script {
   function run(address worldAddress) external {
     StoreSwitch.setStoreAddress(worldAddress);
     startBroadcast();
 
-    // do something
+    votingSystem.setConfig({
+      votingStartTimestamp: uint32(block.timestamp),
+      votingEndTimestamp: 1755280800, // Friday, August 15, 2025 6:00:00 PM (GMT)
+      votesPerParticipant: 3
+    });
 
     vm.stopBroadcast();
 
