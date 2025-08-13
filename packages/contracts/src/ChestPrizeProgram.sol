@@ -5,18 +5,12 @@ import { HookContext, ITransfer } from "@dust/world/src/ProgramHooks.sol";
 import { System, WorldContextConsumer } from "@latticexyz/world/src/System.sol";
 
 import { BaseProgram } from "./BaseProgram.sol";
-import { Counter } from "./codegen/tables/Counter.sol";
 
-contract ChestCounterProgram is ITransfer, System, BaseProgram {
+contract ChestPrizeProgram is ITransfer, System, BaseProgram {
   function onTransfer(HookContext calldata ctx, TransferData calldata) external view onlyWorld {
     if (!ctx.revertOnFailure) return;
 
-    uint256 counterValue = Counter.getValue();
-
-    // Only allow transfers when counter is odd
-    require(counterValue % 2 == 1, "Transfers only allowed when counter is odd");
-
-    // If we reach here, the transfer is allowed
+    // TODO: Implement prize distribution logic
   }
 
   // Required due to inheriting from System and WorldConsumer

@@ -7,16 +7,14 @@ import { ObjectType, ObjectTypes } from "@dust/world/src/types/ObjectType.sol";
 import { MudTest } from "@latticexyz/world/test/MudTest.t.sol";
 import { console } from "forge-std/console.sol";
 
-import { ChestCounterProgram } from "../src/ChestCounterProgram.sol";
+import { ChestPrizeProgram } from "../src/ChestPrizeProgram.sol";
 import { Constants } from "../src/Constants.sol";
 
-import { chestCounterProgram } from "../src/codegen/systems/ChestCounterProgramLib.sol";
-import { counterSystem } from "../src/codegen/systems/CounterSystemLib.sol";
-import { Counter } from "../src/codegen/tables/Counter.sol";
+import { chestPrizeProgram } from "../src/codegen/systems/ChestPrizeProgramLib.sol";
 import { IWorld } from "../src/codegen/world/IWorld.sol";
 
-contract ChestCounterProgramTest is MudTest {
-  ChestCounterProgram program;
+contract ChestPrizeProgramTest is MudTest {
+  ChestPrizeProgram program;
 
   EntityId chest;
   EntityId player;
@@ -25,7 +23,7 @@ contract ChestCounterProgramTest is MudTest {
     super.setUp();
 
     // Deploy the programs
-    program = ChestCounterProgram(chestCounterProgram.getAddress());
+    program = ChestPrizeProgram(chestPrizeProgram.getAddress());
 
     bytes32 worldSlot = keccak256("mud.store.storage.StoreSwitch");
     bytes32 worldAddressBytes32 = bytes32(uint256(uint160(worldAddress)));
@@ -45,8 +43,10 @@ contract ChestCounterProgramTest is MudTest {
     SlotData[] memory deposits = new SlotData[](1);
     deposits[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 5 });
 
-    ITransfer.TransferData memory transfer =
-      ITransfer.TransferData({ deposits: deposits, withdrawals: new SlotData[](0) });
+    ITransfer.TransferData memory transfer = ITransfer.TransferData({
+      deposits: deposits,
+      withdrawals: new SlotData[](0)
+    });
 
     // Should not revert when counter is odd
     vm.prank(worldAddress);
@@ -62,8 +62,10 @@ contract ChestCounterProgramTest is MudTest {
     SlotData[] memory deposits = new SlotData[](1);
     deposits[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 5 });
 
-    ITransfer.TransferData memory transfer =
-      ITransfer.TransferData({ deposits: deposits, withdrawals: new SlotData[](0) });
+    ITransfer.TransferData memory transfer = ITransfer.TransferData({
+      deposits: deposits,
+      withdrawals: new SlotData[](0)
+    });
 
     // Should revert when counter is even
     vm.expectRevert("Transfers only allowed when counter is odd");
@@ -79,8 +81,10 @@ contract ChestCounterProgramTest is MudTest {
     SlotData[] memory deposits = new SlotData[](1);
     deposits[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 5 });
 
-    ITransfer.TransferData memory transfer =
-      ITransfer.TransferData({ deposits: deposits, withdrawals: new SlotData[](0) });
+    ITransfer.TransferData memory transfer = ITransfer.TransferData({
+      deposits: deposits,
+      withdrawals: new SlotData[](0)
+    });
 
     // Transfer should fail at 0 (even)
     vm.expectRevert("Transfers only allowed when counter is odd");
@@ -122,8 +126,10 @@ contract ChestCounterProgramTest is MudTest {
     SlotData[] memory withdrawals = new SlotData[](1);
     withdrawals[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 3 });
 
-    ITransfer.TransferData memory transfer =
-      ITransfer.TransferData({ deposits: new SlotData[](0), withdrawals: withdrawals });
+    ITransfer.TransferData memory transfer = ITransfer.TransferData({
+      deposits: new SlotData[](0),
+      withdrawals: withdrawals
+    });
 
     // Withdrawal should succeed when counter is odd
     vm.prank(worldAddress);
@@ -152,8 +158,10 @@ contract ChestCounterProgramTest is MudTest {
     SlotData[] memory deposits = new SlotData[](1);
     deposits[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 5 });
 
-    ITransfer.TransferData memory transfer =
-      ITransfer.TransferData({ deposits: deposits, withdrawals: new SlotData[](0) });
+    ITransfer.TransferData memory transfer = ITransfer.TransferData({
+      deposits: deposits,
+      withdrawals: new SlotData[](0)
+    });
 
     // Should not revert in non-reverting mode, even when counter is even
     vm.prank(worldAddress);

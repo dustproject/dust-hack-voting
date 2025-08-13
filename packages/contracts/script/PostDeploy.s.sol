@@ -8,7 +8,7 @@ import { Script } from "./Script.sol";
 
 import { bedProgram } from "../src/codegen/systems/BedProgramLib.sol";
 
-import { chestCounterProgram } from "../src/codegen/systems/ChestCounterProgramLib.sol";
+import { chestPrizeProgram } from "../src/codegen/systems/ChestPrizeProgramLib.sol";
 import { chestProgram } from "../src/codegen/systems/ChestProgramLib.sol";
 import { forceFieldProgram } from "../src/codegen/systems/ForceFieldProgramLib.sol";
 import { spawnTileProgram } from "../src/codegen/systems/SpawnTileProgramLib.sol";
@@ -36,6 +36,6 @@ contract PostDeploy is Script {
     vm.store(spawnTileProgram.getAddress(), worldSlot, worldAddressBytes32);
     vm.store(bedProgram.getAddress(), worldSlot, worldAddressBytes32);
     vm.store(chestProgram.getAddress(), worldSlot, worldAddressBytes32);
-    vm.store(chestCounterProgram.getAddress(), worldSlot, worldAddressBytes32);
+    vm.store(chestPrizeProgram.getAddress(), worldSlot, worldAddressBytes32);
   }
 }

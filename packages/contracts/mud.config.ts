@@ -23,7 +23,7 @@ export default defineWorld({
     },
   },
   // Replace this with a unique namespace
-  namespace: "template",
+  namespace: "DUST_HACK_1",
   systems: {
     ForceFieldProgram: {
       openAccess: false,
@@ -41,20 +41,53 @@ export default defineWorld({
       openAccess: false,
       deploy: { registerWorldFunctions: false },
     },
-    CounterSystem: {
-      deploy: { registerWorldFunctions: false },
-    },
-    ChestCounterProgram: {
+    ChestPrizeProgram: {
       openAccess: false,
       deploy: { registerWorldFunctions: false },
     },
   },
   tables: {
-    Counter: {
+    Config: {
       schema: {
-        value: "uint256",
+        votingStartTimestamp: "uint32",
+        votingEndTimestamp: "uint32",
+        votesPerParticipant: "uint32",
       },
       key: [],
+    },
+    Moderators: {
+      schema: {
+        user: "address",
+        isModerator: "bool",
+      },
+      key: ["user"],
+    },
+    Submissions: {
+      schema: {
+        creator: "address",
+        submittedTimestamp: "uint32",
+        votesReceived: "uint32",
+        name: "string",
+        githubUrl: "string",
+        demoVideoUrl: "string",
+      },
+      key: ["creator"],
+    },
+    Participants: {
+      schema: {
+        user: "address",
+        isParticipant: "bool",
+        votesGiven: "uint32",
+      },
+      key: ["user"],
+    },
+    Votes: {
+      schema: {
+        voter: "address",
+        submission: "address",
+        votesGiven: "uint32",
+      },
+      key: ["voter", "submission"],
     },
   },
 });
