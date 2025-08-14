@@ -6,10 +6,11 @@ import { Submissions, SubmissionsData } from "../codegen/tables/Submissions.sol"
 import { Participants, ParticipantsData } from "../codegen/tables/Participants.sol";
 import { Moderators } from "../codegen/tables/Moderators.sol";
 import { AccessControl } from "@latticexyz/world/src/AccessControl.sol";
-import { HACKATHON_NAMESPACE_ID } from "../common.sol";
 import { Config, ConfigData } from "../codegen/tables/Config.sol";
 import { Votes } from "../codegen/tables/Votes.sol";
 import { SubmissionCreators } from "../codegen/tables/SubmissionCreators.sol";
+import { VoteHistory } from "../codegen/tables/VoteHistory.sol";
+import { Constants } from "../Constants.sol";
 
 contract VotingSystem is System {
   error AccessDenied(address user);
@@ -24,7 +25,7 @@ contract VotingSystem is System {
   /// @param user The address of the user to register as a moderator
   /// @param isModerator Whether the user is a moderator
   function setModerator(address user, bool isModerator) public {
-    AccessControl.requireAccess(HACKATHON_NAMESPACE_ID, _msgSender());
+    AccessControl.requireAccess(Constants.NAMESPACE_ID, _msgSender());
     Moderators.set({ user: user, isModerator: isModerator });
   }
 
@@ -134,10 +135,18 @@ contract VotingSystem is System {
     }
 
     uint32 submissionVotesGiven = Votes.getVotesGiven(caller, creator);
+    uint32 submissionVotesReceived = Submissions.getVotesReceived(creator);
 
     Votes.set({ voter: caller, submission: creator, votesGiven: submissionVotesGiven + 1 });
     Participants.setVotesGiven({ user: caller, votesGiven: totalVotesGiven + 1 });
-    Submissions.setVotesReceived({ creator: creator, votesReceived: Submissions.getVotesReceived(creator) + 1 });
+    Submissions.setVotesReceived({ creator: creator, votesReceived: submissionVotesReceived + 1 });
+    VoteHistory.set({
+      voter: caller,
+      submission: creator,
+      timestamp: uint32(block.timestamp),
+      diff: 1,
+      totalVotes: submissionVotesReceived + 1
+    });
   }
 
   /// @notice Revoke a vote for a submission. Only participants who have voted can revoke votes.
@@ -152,9 +161,18 @@ contract VotingSystem is System {
       revert NoVotesToRevoke(caller, submissionVotesGiven);
     }
 
+    uint32 submissionVotesReceived = Submissions.getVotesReceived(creator);
+
     Votes.set({ voter: caller, submission: creator, votesGiven: submissionVotesGiven - 1 });
     Participants.setVotesGiven({ user: caller, votesGiven: Participants.getVotesGiven(caller) - 1 });
-    Submissions.setVotesReceived({ creator: creator, votesReceived: Submissions.getVotesReceived(creator) - 1 });
+    Submissions.setVotesReceived({ creator: creator, votesReceived: submissionVotesReceived - 1 });
+    VoteHistory.set({
+      voter: caller,
+      submission: creator,
+      timestamp: uint32(block.timestamp),
+      diff: -1,
+      totalVotes: submissionVotesReceived - 1
+    });
   }
 
   function _requireValidVote(address caller, address creator) internal view {

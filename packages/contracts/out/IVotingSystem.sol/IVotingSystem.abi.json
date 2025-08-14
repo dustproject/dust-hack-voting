@@ -1,7 +1,7 @@
 [
   {
     "type": "function",
-    "name": "DUST_HACK_1__createSubmission",
+    "name": "dev_hack_1__createSubmission",
     "inputs": [
       {
         "name": "name",
@@ -24,7 +24,7 @@
   },
   {
     "type": "function",
-    "name": "DUST_HACK_1__registerParticipant",
+    "name": "dev_hack_1__registerParticipant",
     "inputs": [
       {
         "name": "user",
@@ -37,7 +37,7 @@
   },
   {
     "type": "function",
-    "name": "DUST_HACK_1__revokeVote",
+    "name": "dev_hack_1__revokeVote",
     "inputs": [
       {
         "name": "creator",
@@ -50,7 +50,7 @@
   },
   {
     "type": "function",
-    "name": "DUST_HACK_1__setConfig",
+    "name": "dev_hack_1__setConfig",
     "inputs": [
       {
         "name": "votingStartTimestamp",
@@ -73,7 +73,7 @@
   },
   {
     "type": "function",
-    "name": "DUST_HACK_1__setModerator",
+    "name": "dev_hack_1__setModerator",
     "inputs": [
       {
         "name": "user",
@@ -91,7 +91,7 @@
   },
   {
     "type": "function",
-    "name": "DUST_HACK_1__updateDemoVideoUrl",
+    "name": "dev_hack_1__updateDemoVideoUrl",
     "inputs": [
       {
         "name": "demoVideoUrl",
@@ -104,7 +104,7 @@
   },
   {
     "type": "function",
-    "name": "DUST_HACK_1__updateGithubUrl",
+    "name": "dev_hack_1__updateGithubUrl",
     "inputs": [
       {
         "name": "githubUrl",
@@ -117,7 +117,7 @@
   },
   {
     "type": "function",
-    "name": "DUST_HACK_1__updateName",
+    "name": "dev_hack_1__updateName",
     "inputs": [
       {
         "name": "name",
@@ -130,7 +130,7 @@
   },
   {
     "type": "function",
-    "name": "DUST_HACK_1__vote",
+    "name": "dev_hack_1__vote",
     "inputs": [
       {
         "name": "creator",

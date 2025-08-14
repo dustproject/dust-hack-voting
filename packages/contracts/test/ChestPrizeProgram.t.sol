@@ -11,7 +11,6 @@ import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
 
 import { ChestPrizeProgram } from "../src/ChestPrizeProgram.sol";
 import { Constants } from "../src/Constants.sol";
-import { HACKATHON_NAMESPACE_ID } from "../src/common.sol";
 
 import { chestPrizeProgram } from "../src/codegen/systems/ChestPrizeProgramLib.sol";
 import { chestPrizeSystem } from "../src/codegen/systems/ChestPrizeSystemLib.sol";
@@ -35,7 +34,7 @@ contract ChestPrizeProgramTest is MudTest {
   EntityId player4;
 
   address winner1;
-  address winner2; 
+  address winner2;
   address winner3;
   address nonWinner;
   address moderator;
@@ -43,10 +42,10 @@ contract ChestPrizeProgramTest is MudTest {
 
   function setUp() public override {
     super.setUp();
-    
+
     // Get world instance
     world = IWorld(worldAddress);
-    
+
     // Deploy the programs
     program = ChestPrizeProgram(chestPrizeProgram.getAddress());
 
@@ -58,7 +57,7 @@ contract ChestPrizeProgramTest is MudTest {
     chest1 = EntityId.wrap(bytes32(uint256(1)));
     chest2 = EntityId.wrap(bytes32(uint256(2)));
     chest3 = EntityId.wrap(bytes32(uint256(3)));
-    
+
     // Set up test accounts
     winner1 = address(0x1);
     winner2 = address(0x2);
@@ -66,7 +65,7 @@ contract ChestPrizeProgramTest is MudTest {
     nonWinner = address(0x4);
     moderator = address(0x5);
     namespaceOwner = address(0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266);
-    
+
     player1 = EntityTypeLib.encodePlayer(winner1);
     player2 = EntityTypeLib.encodePlayer(winner2);
     player3 = EntityTypeLib.encodePlayer(winner3);
@@ -91,10 +90,10 @@ contract ChestPrizeProgramTest is MudTest {
     // Create submissions
     vm.prank(winner1);
     votingSystem.createSubmission("First Place", "github1", "video1");
-    
+
     vm.prank(winner2);
     votingSystem.createSubmission("Second Place", "github2", "video2");
-    
+
     vm.prank(winner3);
     votingSystem.createSubmission("Third Place", "github3", "video3");
 
@@ -106,13 +105,13 @@ contract ChestPrizeProgramTest is MudTest {
     votingSystem.vote(winner1);
     vm.prank(nonWinner);
     votingSystem.vote(winner1);
-    
+
     // Winner2 gets 2 votes
     vm.prank(winner1);
     votingSystem.vote(winner2);
     vm.prank(winner3);
     votingSystem.vote(winner2);
-    
+
     // Winner3 gets 1 vote
     vm.prank(winner1);
     votingSystem.vote(winner3);
@@ -157,12 +156,7 @@ contract ChestPrizeProgramTest is MudTest {
     vm.prank(moderator);
     chestPrizeSystem.configureChest(chest1, LeaderboardPosition.First);
 
-    HookContext memory ctx = HookContext({ 
-      caller: player1, 
-      target: chest1, 
-      revertOnFailure: true, 
-      extraData: "" 
-    });
+    HookContext memory ctx = HookContext({ caller: player1, target: chest1, revertOnFailure: true, extraData: "" });
 
     SlotData[] memory deposits = new SlotData[](1);
     deposits[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 5 });
@@ -181,17 +175,12 @@ contract ChestPrizeProgramTest is MudTest {
     // Reset voting to not ended yet
     vm.prank(moderator);
     votingSystem.setConfig(uint32(block.timestamp), uint32(block.timestamp + 100), 3);
-    
+
     // Configure chest
     vm.prank(moderator);
     chestPrizeSystem.configureChest(chest1, LeaderboardPosition.First);
 
-    HookContext memory ctx = HookContext({ 
-      caller: player1, 
-      target: chest1, 
-      revertOnFailure: true, 
-      extraData: "" 
-    });
+    HookContext memory ctx = HookContext({ caller: player1, target: chest1, revertOnFailure: true, extraData: "" });
 
     SlotData[] memory withdrawals = new SlotData[](1);
     withdrawals[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 10 });
@@ -207,12 +196,7 @@ contract ChestPrizeProgramTest is MudTest {
   }
 
   function test_CannotWithdrawFromUnconfiguredChest() public {
-    HookContext memory ctx = HookContext({ 
-      caller: player1, 
-      target: chest1, 
-      revertOnFailure: true, 
-      extraData: "" 
-    });
+    HookContext memory ctx = HookContext({ caller: player1, target: chest1, revertOnFailure: true, extraData: "" });
 
     SlotData[] memory withdrawals = new SlotData[](1);
     withdrawals[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 10 });
@@ -236,12 +220,7 @@ contract ChestPrizeProgramTest is MudTest {
     vm.stopPrank();
 
     // Non-winner tries to withdraw from first place chest
-    HookContext memory ctx = HookContext({ 
-      caller: player4, 
-      target: chest1, 
-      revertOnFailure: true, 
-      extraData: "" 
-    });
+    HookContext memory ctx = HookContext({ caller: player4, target: chest1, revertOnFailure: true, extraData: "" });
 
     SlotData[] memory withdrawals = new SlotData[](1);
     withdrawals[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 10 });
@@ -262,12 +241,7 @@ contract ChestPrizeProgramTest is MudTest {
     chestPrizeSystem.configureChest(chest1, LeaderboardPosition.First);
 
     // First place winner withdraws
-    HookContext memory ctx = HookContext({ 
-      caller: player1, 
-      target: chest1, 
-      revertOnFailure: true, 
-      extraData: "" 
-    });
+    HookContext memory ctx = HookContext({ caller: player1, target: chest1, revertOnFailure: true, extraData: "" });
 
     SlotData[] memory withdrawals = new SlotData[](2);
     withdrawals[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 100 });
@@ -289,12 +263,7 @@ contract ChestPrizeProgramTest is MudTest {
     chestPrizeSystem.configureChest(chest2, LeaderboardPosition.Second);
 
     // Second place winner withdraws
-    HookContext memory ctx = HookContext({ 
-      caller: player2, 
-      target: chest2, 
-      revertOnFailure: true, 
-      extraData: "" 
-    });
+    HookContext memory ctx = HookContext({ caller: player2, target: chest2, revertOnFailure: true, extraData: "" });
 
     SlotData[] memory withdrawals = new SlotData[](1);
     withdrawals[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 75 });
@@ -315,12 +284,7 @@ contract ChestPrizeProgramTest is MudTest {
     chestPrizeSystem.configureChest(chest3, LeaderboardPosition.Third);
 
     // Third place winner withdraws
-    HookContext memory ctx = HookContext({ 
-      caller: player3, 
-      target: chest3, 
-      revertOnFailure: true, 
-      extraData: "" 
-    });
+    HookContext memory ctx = HookContext({ caller: player3, target: chest3, revertOnFailure: true, extraData: "" });
 
     SlotData[] memory withdrawals = new SlotData[](1);
     withdrawals[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 25 });
@@ -343,12 +307,7 @@ contract ChestPrizeProgramTest is MudTest {
     vm.stopPrank();
 
     // First place winner tries to withdraw from second place chest
-    HookContext memory ctx = HookContext({ 
-      caller: player1, 
-      target: chest2, 
-      revertOnFailure: true, 
-      extraData: "" 
-    });
+    HookContext memory ctx = HookContext({ caller: player1, target: chest2, revertOnFailure: true, extraData: "" });
 
     SlotData[] memory withdrawals = new SlotData[](1);
     withdrawals[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 10 });
@@ -372,12 +331,7 @@ contract ChestPrizeProgramTest is MudTest {
     vm.prank(moderator);
     chestPrizeSystem.configureChest(chest1, LeaderboardPosition.First);
 
-    HookContext memory ctx = HookContext({ 
-      caller: player1, 
-      target: chest1, 
-      revertOnFailure: true, 
-      extraData: "" 
-    });
+    HookContext memory ctx = HookContext({ caller: player1, target: chest1, revertOnFailure: true, extraData: "" });
 
     SlotData[] memory withdrawals = new SlotData[](1);
     withdrawals[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 10 });
@@ -405,12 +359,7 @@ contract ChestPrizeProgramTest is MudTest {
     chestPrizeSystem.configureChest(chest3, LeaderboardPosition.Third);
 
     // Anyone trying to withdraw from third place chest should fail
-    HookContext memory ctx = HookContext({ 
-      caller: player1, 
-      target: chest3, 
-      revertOnFailure: true, 
-      extraData: "" 
-    });
+    HookContext memory ctx = HookContext({ caller: player1, target: chest3, revertOnFailure: true, extraData: "" });
 
     SlotData[] memory withdrawals = new SlotData[](1);
     withdrawals[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 10 });
@@ -431,11 +380,11 @@ contract ChestPrizeProgramTest is MudTest {
     chestPrizeSystem.configureChest(chest1, LeaderboardPosition.First);
 
     // Non-reverting context (revertOnFailure = false)
-    HookContext memory ctx = HookContext({ 
+    HookContext memory ctx = HookContext({
       caller: player4, // non-winner
-      target: chest1, 
-      revertOnFailure: false, 
-      extraData: "" 
+      target: chest1,
+      revertOnFailure: false,
+      extraData: ""
     });
 
     SlotData[] memory withdrawals = new SlotData[](1);

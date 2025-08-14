@@ -8,5 +8,6 @@ import { Moderators } from "./tables/Moderators.sol";
 import { Submissions, SubmissionsData } from "./tables/Submissions.sol";
 import { Participants, ParticipantsData } from "./tables/Participants.sol";
 import { Votes } from "./tables/Votes.sol";
+import { VoteHistory, VoteHistoryData } from "./tables/VoteHistory.sol";
 import { SubmissionCreators } from "./tables/SubmissionCreators.sol";
 import { ChestPrizeConfig } from "./tables/ChestPrizeConfig.sol";

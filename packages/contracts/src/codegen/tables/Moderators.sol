@@ -17,8 +17,8 @@ import { EncodedLengths, EncodedLengthsLib } from "@latticexyz/store/src/Encoded
 import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 
 library Moderators {
-  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "DUST_HACK_1", name: "Moderators", typeId: RESOURCE_TABLE });`
-  ResourceId constant _tableId = ResourceId.wrap(0x7462445553545f4841434b5f310000004d6f64657261746f7273000000000000);
+  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "dev_hack_1", name: "Moderators", typeId: RESOURCE_TABLE });`
+  ResourceId constant _tableId = ResourceId.wrap(0x74626465765f6861636b5f31000000004d6f64657261746f7273000000000000);
 
   FieldLayout constant _fieldLayout =
     FieldLayout.wrap(0x0001010001000000000000000000000000000000000000000000000000000000);

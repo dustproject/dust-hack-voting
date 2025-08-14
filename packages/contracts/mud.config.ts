@@ -26,7 +26,7 @@ export default defineWorld({
     },
   },
   // Replace this with a unique namespace
-  namespace: "DUST_HACK_1",
+  namespace: "dev_hack_1",
   systems: {
     ForceFieldProgram: {
       openAccess: false,
@@ -94,6 +94,17 @@ export default defineWorld({
         votesGiven: "uint32",
       },
       key: ["voter", "submission"],
+    },
+    VoteHistory: {
+      schema: {
+        submission: "address",
+        timestamp: "uint32",
+        voter: "address",
+        diff: "int32",
+        totalVotes: "uint32",
+      },
+      key: ["submission", "voter", "timestamp"],
+      type: "offchainTable",
     },
     SubmissionCreators: {
       schema: {

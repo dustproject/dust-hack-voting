@@ -8,7 +8,6 @@ import { ResourceId } from "@latticexyz/store/src/ResourceId.sol";
 import { WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
 import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
 
-import { HACKATHON_NAMESPACE_ID } from "../src/common.sol";
 import { votingSystem } from "../src/codegen/systems/VotingSystemLib.sol";
 import { Submissions, SubmissionsData } from "../src/codegen/tables/Submissions.sol";
 import { Participants, ParticipantsData } from "../src/codegen/tables/Participants.sol";
@@ -30,10 +29,10 @@ contract VotingSystemTest is MudTest {
 
   function setUp() public override {
     super.setUp();
-    
+
     // Get world instance
     world = IWorld(worldAddress);
-    
+
     // Set up test accounts
     owner = address(this);
     moderator1 = address(0x1);
@@ -60,7 +59,7 @@ contract VotingSystemTest is MudTest {
     vm.prank(participant1);
     vm.expectRevert();
     votingSystem.setModerator(moderator2, true);
-    
+
     assertFalse(Moderators.getIsModerator(moderator2), "Moderator2 should not be registered");
   }
 
@@ -72,7 +71,7 @@ contract VotingSystemTest is MudTest {
     // Moderator should be able to set config
     vm.prank(moderator1);
     votingSystem.setConfig(1000, 2000, 3);
-    
+
     ConfigData memory config = Config.get();
     assertEq(config.votingStartTimestamp, 1000, "Voting start timestamp should be 1000");
     assertEq(config.votingEndTimestamp, 2000, "Voting end timestamp should be 2000");
@@ -92,7 +91,7 @@ contract VotingSystemTest is MudTest {
     // Moderator should be able to register participant
     vm.prank(moderator1);
     votingSystem.registerParticipant(participant1);
-    
+
     assertTrue(Participants.getIsParticipant(participant1), "Participant1 should be registered");
     assertEq(Participants.getVotesGiven(participant1), 0, "Participant1 should have 0 votes given");
 
@@ -100,7 +99,7 @@ contract VotingSystemTest is MudTest {
     vm.prank(participant1);
     vm.expectRevert(abi.encodeWithSignature("AccessDenied(address)", participant2));
     votingSystem.registerParticipant(participant2);
-    
+
     assertFalse(Participants.getIsParticipant(participant2), "Participant2 should not be registered");
   }
 
@@ -114,7 +113,7 @@ contract VotingSystemTest is MudTest {
     // Participant should be able to create submission
     vm.prank(participant1);
     votingSystem.createSubmission("My Project", "https://github.com/test", "https://youtube.com/test");
-    
+
     SubmissionsData memory submission = Submissions.get(participant1);
     assertEq(submission.name, "My Project", "Submission name should match");
     assertEq(submission.githubUrl, "https://github.com/test", "GitHub URL should match");
@@ -151,7 +150,7 @@ contract VotingSystemTest is MudTest {
     votingSystem.setModerator(moderator1, true);
     vm.prank(moderator1);
     votingSystem.registerParticipant(participant1);
-    
+
     vm.prank(participant1);
     votingSystem.createSubmission("Initial Name", "https://github.com/initial", "https://youtube.com/initial");
 
@@ -168,7 +167,11 @@ contract VotingSystemTest is MudTest {
     // Update demo video URL
     vm.prank(participant1);
     votingSystem.updateDemoVideoUrl("https://youtube.com/updated");
-    assertEq(Submissions.getDemoVideoUrl(participant1), "https://youtube.com/updated", "Demo video URL should be updated");
+    assertEq(
+      Submissions.getDemoVideoUrl(participant1),
+      "https://youtube.com/updated",
+      "Demo video URL should be updated"
+    );
   }
 
   function test_OnlySubmissionCreatorCanUpdateFields() public {
@@ -179,7 +182,7 @@ contract VotingSystemTest is MudTest {
     votingSystem.registerParticipant(participant1);
     votingSystem.registerParticipant(participant2);
     vm.stopPrank();
-    
+
     // Participant1 creates submission
     vm.prank(participant1);
     votingSystem.createSubmission("My Project", "https://github.com/test", "https://youtube.com/test");
@@ -194,15 +197,15 @@ contract VotingSystemTest is MudTest {
     // Set up moderator, config, and participants
     vm.prank(namespaceOwner);
     votingSystem.setModerator(moderator1, true);
-    
+
     vm.prank(moderator1);
     votingSystem.setConfig(uint32(block.timestamp), uint32(block.timestamp + 1000), 3);
-    
+
     vm.startPrank(moderator1);
     votingSystem.registerParticipant(participant1);
     votingSystem.registerParticipant(participant2);
     vm.stopPrank();
-    
+
     // Create submission
     vm.prank(participant1);
     votingSystem.createSubmission("My Project", "https://github.com/test", "https://youtube.com/test");
@@ -222,17 +225,17 @@ contract VotingSystemTest is MudTest {
     // Set up with 2 votes per participant
     vm.prank(namespaceOwner);
     votingSystem.setModerator(moderator1, true);
-    
+
     vm.prank(moderator1);
     votingSystem.setConfig(uint32(block.timestamp), uint32(block.timestamp + 1000), 2);
-    
+
     vm.startPrank(moderator1);
     votingSystem.registerParticipant(participant1);
     votingSystem.registerParticipant(participant2);
     votingSystem.registerParticipant(participant3);
     votingSystem.registerParticipant(participant4);
     vm.stopPrank();
-    
+
     // Create submissions
     vm.prank(participant1);
     votingSystem.createSubmission("Project 1", "url1", "video1");
@@ -245,7 +248,7 @@ contract VotingSystemTest is MudTest {
     vm.startPrank(participant4);
     votingSystem.vote(participant1);
     votingSystem.vote(participant2);
-    
+
     // Third vote should fail
     vm.expectRevert(abi.encodeWithSignature("NoVotesLeft(address,uint32,uint32)", participant4, 2, 2));
     votingSystem.vote(participant3);
@@ -258,17 +261,17 @@ contract VotingSystemTest is MudTest {
     // Set up
     vm.prank(namespaceOwner);
     votingSystem.setModerator(moderator1, true);
-    
+
     vm.prank(moderator1);
     votingSystem.setConfig(uint32(block.timestamp), uint32(block.timestamp + 1000), 3);
-    
+
     vm.startPrank(moderator1);
     votingSystem.registerParticipant(participant1);
     votingSystem.registerParticipant(participant2);
     votingSystem.registerParticipant(participant3);
     votingSystem.registerParticipant(participant4);
     vm.stopPrank();
-    
+
     // Create submissions
     vm.prank(participant1);
     votingSystem.createSubmission("Project 1", "url1", "video1");
@@ -278,10 +281,10 @@ contract VotingSystemTest is MudTest {
     // Multiple participants vote
     vm.prank(participant3);
     votingSystem.vote(participant1); // participant1: 1 vote
-    
+
     vm.prank(participant4);
     votingSystem.vote(participant1); // participant1: 2 votes
-    
+
     vm.prank(participant3);
     votingSystem.vote(participant2); // participant2: 1 vote
 
@@ -290,7 +293,7 @@ contract VotingSystemTest is MudTest {
     assertEq(Submissions.getVotesReceived(participant2), 1, "Participant2 should have 1 vote");
     assertEq(Participants.getVotesGiven(participant3), 2, "Participant3 should have given 2 votes");
     assertEq(Participants.getVotesGiven(participant4), 1, "Participant4 should have given 1 vote");
-    
+
     // Check individual vote records
     assertEq(Votes.getVotesGiven(participant3, participant1), 1, "Participant3 -> Participant1 should be 1 vote");
     assertEq(Votes.getVotesGiven(participant3, participant2), 1, "Participant3 -> Participant2 should be 1 vote");
@@ -301,16 +304,16 @@ contract VotingSystemTest is MudTest {
     // Set up
     vm.prank(namespaceOwner);
     votingSystem.setModerator(moderator1, true);
-    
+
     vm.prank(moderator1);
     votingSystem.setConfig(uint32(block.timestamp), uint32(block.timestamp + 1000), 3);
-    
+
     vm.startPrank(moderator1);
     votingSystem.registerParticipant(participant1);
     votingSystem.registerParticipant(participant2);
     votingSystem.registerParticipant(participant3);
     vm.stopPrank();
-    
+
     // Create submissions
     vm.prank(participant1);
     votingSystem.createSubmission("Project 1", "url1", "video1");
@@ -340,15 +343,15 @@ contract VotingSystemTest is MudTest {
     // Set up
     vm.prank(namespaceOwner);
     votingSystem.setModerator(moderator1, true);
-    
+
     vm.prank(moderator1);
     votingSystem.setConfig(uint32(block.timestamp), uint32(block.timestamp + 1000), 3);
-    
+
     vm.startPrank(moderator1);
     votingSystem.registerParticipant(participant1);
     votingSystem.registerParticipant(participant2);
     vm.stopPrank();
-    
+
     // Create submission
     vm.prank(participant1);
     votingSystem.createSubmission("Project 1", "url1", "video1");
@@ -363,31 +366,33 @@ contract VotingSystemTest is MudTest {
     // Set up
     vm.prank(namespaceOwner);
     votingSystem.setModerator(moderator1, true);
-    
+
     uint32 currentTime = uint32(block.timestamp);
     uint32 votingStart = currentTime + 100;
     uint32 votingEnd = votingStart + 100;
-    
+
     vm.prank(moderator1);
     votingSystem.setConfig(votingStart, votingEnd, 3);
-    
+
     vm.startPrank(moderator1);
     votingSystem.registerParticipant(participant1);
     votingSystem.registerParticipant(participant2);
     vm.stopPrank();
-    
+
     // Create submission
     vm.prank(participant1);
     votingSystem.createSubmission("Project 1", "url1", "video1");
 
     // Try to vote before voting period
     vm.prank(participant2);
-    vm.expectRevert(abi.encodeWithSignature("NotInVotingPeriod(uint32,uint32,uint32)", currentTime, votingStart, votingEnd));
+    vm.expectRevert(
+      abi.encodeWithSignature("NotInVotingPeriod(uint32,uint32,uint32)", currentTime, votingStart, votingEnd)
+    );
     votingSystem.vote(participant1);
 
     // Move to voting period
     vm.warp(votingStart + 1);
-    
+
     // Now voting should work
     vm.prank(participant2);
     votingSystem.vote(participant1);
@@ -395,10 +400,12 @@ contract VotingSystemTest is MudTest {
 
     // Move past voting period
     vm.warp(votingEnd + 1);
-    
+
     // Voting should fail again
     vm.prank(participant2);
-    vm.expectRevert(abi.encodeWithSignature("NotInVotingPeriod(uint32,uint32,uint32)", votingEnd + 1, votingStart, votingEnd));
+    vm.expectRevert(
+      abi.encodeWithSignature("NotInVotingPeriod(uint32,uint32,uint32)", votingEnd + 1, votingStart, votingEnd)
+    );
     votingSystem.vote(participant1);
   }
 
@@ -406,32 +413,34 @@ contract VotingSystemTest is MudTest {
     // Set up
     vm.prank(namespaceOwner);
     votingSystem.setModerator(moderator1, true);
-    
+
     uint32 currentTime = uint32(block.timestamp);
     uint32 votingStart = currentTime;
     uint32 votingEnd = votingStart + 100;
-    
+
     vm.prank(moderator1);
     votingSystem.setConfig(votingStart, votingEnd, 3);
-    
+
     vm.startPrank(moderator1);
     votingSystem.registerParticipant(participant1);
     votingSystem.registerParticipant(participant2);
     vm.stopPrank();
-    
+
     // Create submission and vote
     vm.prank(participant1);
     votingSystem.createSubmission("Project 1", "url1", "video1");
-    
+
     vm.prank(participant2);
     votingSystem.vote(participant1);
 
     // Move past voting period
     vm.warp(votingEnd + 1);
-    
+
     // Revoking should also fail outside voting period
     vm.prank(participant2);
-    vm.expectRevert(abi.encodeWithSignature("NotInVotingPeriod(uint32,uint32,uint32)", votingEnd + 1, votingStart, votingEnd));
+    vm.expectRevert(
+      abi.encodeWithSignature("NotInVotingPeriod(uint32,uint32,uint32)", votingEnd + 1, votingStart, votingEnd)
+    );
     votingSystem.revokeVote(participant1);
   }
 
@@ -439,10 +448,10 @@ contract VotingSystemTest is MudTest {
     // Set up
     vm.prank(namespaceOwner);
     votingSystem.setModerator(moderator1, true);
-    
+
     vm.prank(moderator1);
     votingSystem.setConfig(uint32(block.timestamp), uint32(block.timestamp + 1000), 3);
-    
+
     vm.startPrank(moderator1);
     votingSystem.registerParticipant(participant1);
     votingSystem.registerParticipant(participant2);
@@ -458,15 +467,15 @@ contract VotingSystemTest is MudTest {
     // Set up
     vm.prank(namespaceOwner);
     votingSystem.setModerator(moderator1, true);
-    
+
     vm.prank(moderator1);
     votingSystem.setConfig(uint32(block.timestamp), uint32(block.timestamp + 1000), 3);
-    
+
     vm.startPrank(moderator1);
     votingSystem.registerParticipant(participant1);
     votingSystem.registerParticipant(participant2);
     vm.stopPrank();
-    
+
     // Create submission
     vm.prank(participant1);
     votingSystem.createSubmission("Project 1", "url1", "video1");
@@ -508,13 +517,13 @@ contract VotingSystemTest is MudTest {
     // Setup phase
     vm.prank(namespaceOwner);
     votingSystem.setModerator(moderator1, true);
-    
+
     uint32 votingStart = uint32(block.timestamp);
     uint32 votingEnd = votingStart + 1000;
-    
+
     vm.prank(moderator1);
     votingSystem.setConfig(votingStart, votingEnd, 2);
-    
+
     // Register 4 participants
     vm.startPrank(moderator1);
     votingSystem.registerParticipant(participant1);
@@ -522,14 +531,14 @@ contract VotingSystemTest is MudTest {
     votingSystem.registerParticipant(participant3);
     votingSystem.registerParticipant(participant4);
     vm.stopPrank();
-    
+
     // Submission phase - 3 participants submit projects
     vm.prank(participant1);
     votingSystem.createSubmission("DeFi Protocol", "https://github.com/defi", "https://youtube.com/defi");
-    
+
     vm.prank(participant2);
     votingSystem.createSubmission("NFT Marketplace", "https://github.com/nft", "https://youtube.com/nft");
-    
+
     vm.prank(participant3);
     votingSystem.createSubmission("Gaming Platform", "https://github.com/gaming", "https://youtube.com/gaming");
 
@@ -539,20 +548,20 @@ contract VotingSystemTest is MudTest {
     votingSystem.vote(participant2);
     votingSystem.vote(participant3);
     vm.stopPrank();
-    
+
     // Participant2 votes for project 1 twice
     vm.startPrank(participant2);
     votingSystem.vote(participant1);
     votingSystem.vote(participant1);
     vm.stopPrank();
-    
+
     // Participant3 votes for project 1 once, then changes mind
     vm.startPrank(participant3);
     votingSystem.vote(participant1);
     votingSystem.revokeVote(participant1);
     votingSystem.vote(participant2);
     vm.stopPrank();
-    
+
     // Participant4 votes for project 2
     vm.prank(participant4);
     votingSystem.vote(participant2);
@@ -561,7 +570,7 @@ contract VotingSystemTest is MudTest {
     assertEq(Submissions.getVotesReceived(participant1), 2, "Project 1 should have 2 votes");
     assertEq(Submissions.getVotesReceived(participant2), 3, "Project 2 should have 3 votes");
     assertEq(Submissions.getVotesReceived(participant3), 1, "Project 3 should have 1 vote");
-    
+
     // Verify vote counts per participant
     assertEq(Participants.getVotesGiven(participant1), 2, "Participant1 gave 2 votes");
     assertEq(Participants.getVotesGiven(participant2), 2, "Participant2 gave 2 votes");

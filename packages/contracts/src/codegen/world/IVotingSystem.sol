@@ -17,29 +17,29 @@ interface IVotingSystem {
   error NoVotesLeft(address user, uint32 votesGiven, uint32 votesPerParticipant);
   error NoVotesToRevoke(address user, uint32 votesGiven);
 
-  function DUST_HACK_1__setModerator(address user, bool isModerator) external;
+  function dev_hack_1__setModerator(address user, bool isModerator) external;
 
-  function DUST_HACK_1__setConfig(
+  function dev_hack_1__setConfig(
     uint32 votingStartTimestamp,
     uint32 votingEndTimestamp,
     uint32 votesPerParticipant
   ) external;
 
-  function DUST_HACK_1__registerParticipant(address user) external;
+  function dev_hack_1__registerParticipant(address user) external;
 
-  function DUST_HACK_1__createSubmission(
+  function dev_hack_1__createSubmission(
     string memory name,
     string memory githubUrl,
     string memory demoVideoUrl
   ) external;
 
-  function DUST_HACK_1__updateName(string memory name) external;
+  function dev_hack_1__updateName(string memory name) external;
 
-  function DUST_HACK_1__updateGithubUrl(string memory githubUrl) external;
+  function dev_hack_1__updateGithubUrl(string memory githubUrl) external;
 
-  function DUST_HACK_1__updateDemoVideoUrl(string memory demoVideoUrl) external;
+  function dev_hack_1__updateDemoVideoUrl(string memory demoVideoUrl) external;
 
-  function DUST_HACK_1__vote(address creator) external;
+  function dev_hack_1__vote(address creator) external;
 
-  function DUST_HACK_1__revokeVote(address creator) external;
+  function dev_hack_1__revokeVote(address creator) external;
 }
