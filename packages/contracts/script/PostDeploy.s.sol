@@ -19,6 +19,7 @@ contract PostDeploy is Script {
     address deployer = startBroadcast();
 
     votingSystem.setModerator({ user: deployer, isModerator: true });
+    votingSystem.setModerator({ user: address(0xDca1bb1fc782eA3FA76eA4aDa42aF10C85766B6A), isModerator: true });
     votingSystem.setConfig({
       votingStartTimestamp: uint32(block.timestamp),
       votingEndTimestamp: 1755280800, // Friday, August 15, 2025 6:00:00 PM (GMT)

@@ -30,25 +30,28 @@ export default defineWorld({
   systems: {
     ForceFieldProgram: {
       openAccess: false,
-      deploy: { registerWorldFunctions: false },
+      deploy: { registerWorldFunctions: false, disabled: true },
     },
     SpawnTileProgram: {
       openAccess: false,
-      deploy: { registerWorldFunctions: false },
+      deploy: { registerWorldFunctions: false, disabled: true },
     },
     ChestProgram: {
       openAccess: false,
-      deploy: { registerWorldFunctions: false },
+      deploy: { registerWorldFunctions: false, disabled: true },
     },
     BedProgram: {
       openAccess: false,
-      deploy: { registerWorldFunctions: false },
+      deploy: { registerWorldFunctions: false, disabled: true },
     },
     ChestPrizeProgram: {
       openAccess: false,
       deploy: { registerWorldFunctions: false },
     },
     ChestPrizeSystem: {
+      deploy: { registerWorldFunctions: false },
+    },
+    VotingSystem: {
       deploy: { registerWorldFunctions: false },
     },
   },
