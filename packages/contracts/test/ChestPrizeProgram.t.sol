@@ -151,12 +151,13 @@ contract ChestPrizeProgramTest is MudTest {
     assertEq(uint256(ChestPrizeConfig.getPosition(chest1)), uint256(LeaderboardPosition.Unset));
   }
 
-  function test_CannotDepositToChest() public {
+  function test_AnyoneCanDepositToChest() public {
     // Configure chest
     vm.prank(moderator);
     chestPrizeSystem.configureChest(chest1, LeaderboardPosition.First);
 
-    HookContext memory ctx = HookContext({ caller: player1, target: chest1, revertOnFailure: true, extraData: "" });
+    // Anyone should be able to deposit, even non-participants
+    HookContext memory ctx = HookContext({ caller: player4, target: chest1, revertOnFailure: true, extraData: "" });
 
     SlotData[] memory deposits = new SlotData[](1);
     deposits[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 5 });
@@ -166,8 +167,34 @@ contract ChestPrizeProgramTest is MudTest {
       withdrawals: new SlotData[](0)
     });
 
+    // Should not revert - deposits are allowed from anyone
     vm.prank(worldAddress);
-    vm.expectRevert(abi.encodeWithSignature("DepositNotAllowed()"));
+    program.onTransfer(ctx, transfer);
+  }
+
+  function test_ModeratorCanWithdrawAnytime() public {
+    // Reset voting to not ended yet
+    vm.prank(moderator);
+    votingSystem.setConfig(uint32(block.timestamp), uint32(block.timestamp + 100), 3);
+
+    // Configure chest
+    vm.prank(moderator);
+    chestPrizeSystem.configureChest(chest1, LeaderboardPosition.First);
+
+    // Moderator withdraws even though voting hasn't ended
+    EntityId moderatorEntity = EntityTypeLib.encodePlayer(moderator);
+    HookContext memory ctx = HookContext({ caller: moderatorEntity, target: chest1, revertOnFailure: true, extraData: "" });
+
+    SlotData[] memory withdrawals = new SlotData[](1);
+    withdrawals[0] = SlotData({ entityId: EntityId.wrap(0), objectType: ObjectTypes.WheatSeed, amount: 10 });
+
+    ITransfer.TransferData memory transfer = ITransfer.TransferData({
+      deposits: new SlotData[](0),
+      withdrawals: withdrawals
+    });
+
+    // Should not revert - moderators can withdraw anytime
+    vm.prank(worldAddress);
     program.onTransfer(ctx, transfer);
   }
 
@@ -231,7 +258,7 @@ contract ChestPrizeProgramTest is MudTest {
     });
 
     vm.prank(worldAddress);
-    vm.expectRevert(abi.encodeWithSignature("NotWinner()"));
+    vm.expectRevert(abi.encodeWithSignature("NotAuthorizedToWithdraw()"));
     program.onTransfer(ctx, transfer);
   }
 
@@ -318,7 +345,7 @@ contract ChestPrizeProgramTest is MudTest {
     });
 
     vm.prank(worldAddress);
-    vm.expectRevert(abi.encodeWithSignature("NotWinner()"));
+    vm.expectRevert(abi.encodeWithSignature("NotAuthorizedToWithdraw()"));
     program.onTransfer(ctx, transfer);
   }
 
@@ -370,7 +397,7 @@ contract ChestPrizeProgramTest is MudTest {
     });
 
     vm.prank(worldAddress);
-    vm.expectRevert(abi.encodeWithSignature("NotWinner()"));
+    vm.expectRevert(abi.encodeWithSignature("NotAuthorizedToWithdraw()"));
     program.onTransfer(ctx, transfer);
   }
 

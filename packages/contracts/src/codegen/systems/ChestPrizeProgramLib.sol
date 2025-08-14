@@ -38,10 +38,9 @@ struct RootCallWrapper {
 library ChestPrizeProgramLib {
   error ChestPrizeProgramLib_CallingFromRootSystem();
   error VotingNotEnded();
-  error NotWinner();
+  error NotAuthorizedToWithdraw();
   error NoSubmissions();
   error ChestNotConfigured();
-  error DepositNotAllowed();
 
   function onTransfer(
     ChestPrizeProgramType self,
