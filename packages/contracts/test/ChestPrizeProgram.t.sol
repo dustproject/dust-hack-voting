@@ -218,7 +218,7 @@ contract ChestPrizeProgramTest is MudTest {
     });
 
     vm.prank(worldAddress);
-    vm.expectRevert(abi.encodeWithSignature("VotingNotEnded()"));
+    vm.expectRevert("Voting period has not ended yet");
     program.onTransfer(ctx, transfer);
   }
 
@@ -234,7 +234,7 @@ contract ChestPrizeProgramTest is MudTest {
     });
 
     vm.prank(worldAddress);
-    vm.expectRevert(abi.encodeWithSignature("ChestNotConfigured()"));
+    vm.expectRevert("This chest is not configured for any prize position");
     program.onTransfer(ctx, transfer);
   }
 
@@ -258,7 +258,7 @@ contract ChestPrizeProgramTest is MudTest {
     });
 
     vm.prank(worldAddress);
-    vm.expectRevert(abi.encodeWithSignature("NotAuthorizedToWithdraw()"));
+    vm.expectRevert("You are not authorized to withdraw from this chest");
     program.onTransfer(ctx, transfer);
   }
 
@@ -345,7 +345,7 @@ contract ChestPrizeProgramTest is MudTest {
     });
 
     vm.prank(worldAddress);
-    vm.expectRevert(abi.encodeWithSignature("NotAuthorizedToWithdraw()"));
+    vm.expectRevert("You are not authorized to withdraw from this chest");
     program.onTransfer(ctx, transfer);
   }
 
@@ -369,7 +369,7 @@ contract ChestPrizeProgramTest is MudTest {
     });
 
     vm.prank(worldAddress);
-    vm.expectRevert(abi.encodeWithSignature("NoSubmissions()"));
+    vm.expectRevert("No submissions have been made yet");
     program.onTransfer(ctx, transfer);
   }
 
@@ -397,7 +397,7 @@ contract ChestPrizeProgramTest is MudTest {
     });
 
     vm.prank(worldAddress);
-    vm.expectRevert(abi.encodeWithSignature("NotAuthorizedToWithdraw()"));
+    vm.expectRevert("You are not authorized to withdraw from this chest");
     program.onTransfer(ctx, transfer);
   }
 

@@ -1,6 +1,102 @@
 declare const abi: [
   {
     "type": "function",
+    "name": "DUST_HACK_1___msgSender",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "DUST_HACK_1___msgValue",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "DUST_HACK_1__onAttachProgram",
+    "inputs": [
+      {
+        "name": "ctx",
+        "type": "tuple",
+        "internalType": "struct HookContext",
+        "components": [
+          {
+            "name": "caller",
+            "type": "bytes32",
+            "internalType": "EntityId"
+          },
+          {
+            "name": "target",
+            "type": "bytes32",
+            "internalType": "EntityId"
+          },
+          {
+            "name": "revertOnFailure",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "extraData",
+            "type": "bytes",
+            "internalType": "bytes"
+          }
+        ]
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "DUST_HACK_1__onDetachProgram",
+    "inputs": [
+      {
+        "name": "ctx",
+        "type": "tuple",
+        "internalType": "struct HookContext",
+        "components": [
+          {
+            "name": "caller",
+            "type": "bytes32",
+            "internalType": "EntityId"
+          },
+          {
+            "name": "target",
+            "type": "bytes32",
+            "internalType": "EntityId"
+          },
+          {
+            "name": "revertOnFailure",
+            "type": "bool",
+            "internalType": "bool"
+          },
+          {
+            "name": "extraData",
+            "type": "bytes",
+            "internalType": "bytes"
+          }
+        ]
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
     "name": "batchCall",
     "inputs": [
       {
@@ -145,102 +241,6 @@ declare const abi: [
         "name": "keyTuple",
         "type": "bytes32[]",
         "internalType": "bytes32[]"
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "dev_hack_1___msgSender",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "address",
-        "internalType": "address"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "dev_hack_1___msgValue",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256",
-        "internalType": "uint256"
-      }
-    ],
-    "stateMutability": "view"
-  },
-  {
-    "type": "function",
-    "name": "dev_hack_1__onAttachProgram",
-    "inputs": [
-      {
-        "name": "ctx",
-        "type": "tuple",
-        "internalType": "struct HookContext",
-        "components": [
-          {
-            "name": "caller",
-            "type": "bytes32",
-            "internalType": "EntityId"
-          },
-          {
-            "name": "target",
-            "type": "bytes32",
-            "internalType": "EntityId"
-          },
-          {
-            "name": "revertOnFailure",
-            "type": "bool",
-            "internalType": "bool"
-          },
-          {
-            "name": "extraData",
-            "type": "bytes",
-            "internalType": "bytes"
-          }
-        ]
-      }
-    ],
-    "outputs": [],
-    "stateMutability": "nonpayable"
-  },
-  {
-    "type": "function",
-    "name": "dev_hack_1__onDetachProgram",
-    "inputs": [
-      {
-        "name": "ctx",
-        "type": "tuple",
-        "internalType": "struct HookContext",
-        "components": [
-          {
-            "name": "caller",
-            "type": "bytes32",
-            "internalType": "EntityId"
-          },
-          {
-            "name": "target",
-            "type": "bytes32",
-            "internalType": "EntityId"
-          },
-          {
-            "name": "revertOnFailure",
-            "type": "bool",
-            "internalType": "bool"
-          },
-          {
-            "name": "extraData",
-            "type": "bytes",
-            "internalType": "bytes"
-          }
-        ]
       }
     ],
     "outputs": [],

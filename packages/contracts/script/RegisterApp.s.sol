@@ -3,6 +3,7 @@ pragma solidity >=0.8.30;
 
 import { metadataSystem } from "@latticexyz/world-module-metadata/src/codegen/experimental/systems/MetadataSystemLib.sol";
 import { ResourceId, WorldResourceIdLib } from "@latticexyz/world/src/WorldResourceId.sol";
+import { Constants } from "../src/Constants.sol";
 
 import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
 
@@ -17,12 +18,10 @@ contract RegisterApp is Script {
 
     startBroadcast();
 
-    ResourceId appNamespaceId = WorldResourceIdLib.encodeNamespace("my_namespace");
-    string memory appUrl = "https://example.com/dust-app.json";
+    string memory appUrl = "https://dust-hack-voting.vercel.app/dust-app.json";
     console.log("Registering app with url: %s", appUrl);
 
-    metadataSystem.setResourceTag(appNamespaceId, "dust.appConfigUrl", bytes(appUrl));
-    metadataSystem.setResourceTag(appNamespaceId, "dust.spawnAppConfigUrl", bytes(appUrl));
+    metadataSystem.setResourceTag(Constants.NAMESPACE_ID, "dust.appConfigUrl", bytes(appUrl));
 
     vm.stopBroadcast();
   }

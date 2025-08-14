@@ -23,8 +23,8 @@ struct ConfigData {
 }
 
 library Config {
-  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "dev_hack_1", name: "Config", typeId: RESOURCE_TABLE });`
-  ResourceId constant _tableId = ResourceId.wrap(0x74626465765f6861636b5f3100000000436f6e66696700000000000000000000);
+  // Hex below is the result of `WorldResourceIdLib.encode({ namespace: "DUST_HACK_1", name: "Config", typeId: RESOURCE_TABLE });`
+  ResourceId constant _tableId = ResourceId.wrap(0x7462445553545f4841434b5f31000000436f6e66696700000000000000000000);
 
   FieldLayout constant _fieldLayout =
     FieldLayout.wrap(0x000c030004040400000000000000000000000000000000000000000000000000);

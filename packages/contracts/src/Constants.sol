@@ -9,5 +9,5 @@ library Constants {
   address internal constant DUST_ADDRESS = 0x253eb85B3C953bFE3827CC14a151262482E7189C;
   IWorld internal constant DUST_WORLD = IWorld(DUST_ADDRESS);
   ResourceId constant NAMESPACE_ID =
-    ResourceId.wrap(bytes32(abi.encodePacked(RESOURCE_NAMESPACE, bytes14("dev_hack_1"), "")));
+    ResourceId.wrap(bytes32(abi.encodePacked(RESOURCE_NAMESPACE, bytes14("DUST_HACK_1"), "")));
 }

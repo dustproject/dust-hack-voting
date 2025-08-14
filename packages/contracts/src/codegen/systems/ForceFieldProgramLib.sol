@@ -15,9 +15,9 @@ import { StoreSwitch } from "@latticexyz/store/src/StoreSwitch.sol";
 
 type ForceFieldProgramType is bytes32;
 
-// equivalent to WorldResourceIdLib.encode({ typeId: RESOURCE_SYSTEM, namespace: "dev_hack_1", name: "ForceFieldProgra" }))
+// equivalent to WorldResourceIdLib.encode({ typeId: RESOURCE_SYSTEM, namespace: "DUST_HACK_1", name: "ForceFieldProgra" }))
 ForceFieldProgramType constant forceFieldProgram = ForceFieldProgramType.wrap(
-  0x73796465765f6861636b5f3100000000466f7263654669656c6450726f677261
+  0x7379445553545f4841434b5f31000000466f7263654669656c6450726f677261
 );
 
 struct CallWrapper {

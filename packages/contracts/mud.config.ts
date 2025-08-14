@@ -26,7 +26,7 @@ export default defineWorld({
     },
   },
   // Replace this with a unique namespace
-  namespace: "dev_hack_1",
+  namespace: "DUST_HACK_1",
   systems: {
     ForceFieldProgram: {
       openAccess: false,

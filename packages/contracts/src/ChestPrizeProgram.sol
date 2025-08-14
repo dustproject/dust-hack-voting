@@ -13,11 +13,6 @@ import { Moderators } from "./codegen/tables/Moderators.sol";
 import { LeaderboardPosition } from "./codegen/common.sol";
 
 contract ChestPrizeProgram is ITransfer, System, BaseProgram {
-  error VotingNotEnded();
-  error NotAuthorizedToWithdraw();
-  error NoSubmissions();
-  error ChestNotConfigured();
-
   function onTransfer(HookContext calldata ctx, TransferData calldata transfer) external view onlyWorld {
     if (!ctx.revertOnFailure) return;
 
@@ -36,7 +31,7 @@ contract ChestPrizeProgram is ITransfer, System, BaseProgram {
       // For non-moderators, check if voting has ended
       uint32 votingEndTimestamp = Config.getVotingEndTimestamp();
       if (block.timestamp <= votingEndTimestamp) {
-        revert VotingNotEnded();
+        revert("Voting period has not ended yet");
       }
 
       // Get the chest's configured position
@@ -44,7 +39,7 @@ contract ChestPrizeProgram is ITransfer, System, BaseProgram {
 
       // Check if chest is configured (not Unset)
       if (position == LeaderboardPosition.Unset) {
-        revert ChestNotConfigured();
+        revert("This chest is not configured for any prize position");
       }
 
       // Get the winner for this chest's configured position
@@ -52,7 +47,7 @@ contract ChestPrizeProgram is ITransfer, System, BaseProgram {
 
       // Check if the player is the winner
       if (player != winner) {
-        revert NotAuthorizedToWithdraw();
+        revert("You are not authorized to withdraw from this chest");
       }
     }
 
@@ -63,7 +58,7 @@ contract ChestPrizeProgram is ITransfer, System, BaseProgram {
     address[] memory creators = SubmissionCreators.get();
 
     if (creators.length == 0) {
-      revert NoSubmissions();
+      revert("No submissions have been made yet");
     }
 
     // Convert enum position to target rank (First = 1 -> rank 0, Second = 2 -> rank 1, etc.)

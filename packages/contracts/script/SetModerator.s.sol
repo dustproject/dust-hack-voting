@@ -13,7 +13,7 @@ contract SetModerator is Script {
 
     startBroadcast();
 
-    votingSystem.setModerator({ user: address(0xDca1bb1fc782eA3FA76eA4aDa42aF10C85766B6A), isModerator: false });
+    // votingSystem.setModerator({ user: address(0x8a99613c003468079f948fd257c53BC30c788bAE), isModerator: false });
 
     vm.stopBroadcast();
   }
