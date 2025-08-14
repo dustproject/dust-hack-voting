@@ -20,6 +20,7 @@ contract VotingSystem is System {
   error NotInVotingPeriod(uint32 timestamp, uint32 votingStartTimestamp, uint32 votingEndTimestamp);
   error NoVotesLeft(address user, uint32 votesGiven, uint32 votesPerParticipant);
   error NoVotesToRevoke(address user, uint32 votesGiven);
+  error SelfVoteNotAllowed(address user);
 
   /// @notice Register a moderator. Only the namespace owner can register moderators
   /// @param user The address of the user to register as a moderator
@@ -176,6 +177,10 @@ contract VotingSystem is System {
   }
 
   function _requireValidVote(address caller, address creator) internal view {
+    if (caller == creator) {
+      revert SelfVoteNotAllowed(caller);
+    }
+
     if (!Participants.getIsParticipant(caller)) {
       revert NotParticipant(caller);
     }
