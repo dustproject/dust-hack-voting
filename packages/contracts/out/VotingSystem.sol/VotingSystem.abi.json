@@ -431,6 +431,17 @@
   },
   {
     "type": "error",
+    "name": "SelfVoteNotAllowed",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address",
+        "internalType": "address"
+      }
+    ]
+  },
+  {
+    "type": "error",
     "name": "Slice_OutOfBounds",
     "inputs": [
       {

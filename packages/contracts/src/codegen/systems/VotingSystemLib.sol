@@ -43,6 +43,7 @@ library VotingSystemLib {
   error NotInVotingPeriod(uint32 timestamp, uint32 votingStartTimestamp, uint32 votingEndTimestamp);
   error NoVotesLeft(address user, uint32 votesGiven, uint32 votesPerParticipant);
   error NoVotesToRevoke(address user, uint32 votesGiven);
+  error SelfVoteNotAllowed(address user);
 
   function setModerator(VotingSystemType self, address user, bool isModerator) internal {
     return CallWrapper(self.toResourceId(), address(0)).setModerator(user, isModerator);
