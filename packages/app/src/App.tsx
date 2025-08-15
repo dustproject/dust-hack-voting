@@ -227,7 +227,7 @@ export default function App() {
                   ) : (
                     <p>
                       <a
-                        href={`https://alpha.dustproject.org?debug-app=${window.location.origin}/dust-app.json`}
+                        href={`https://alpha.dustproject.org?open-app=${window.location.origin}/dust-app.json`}
                         className="text-blue-600 underline hover:text-blue-800"
                       >
                         Open in DUST
